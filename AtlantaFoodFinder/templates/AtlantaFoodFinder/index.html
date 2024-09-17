@@ -172,7 +172,7 @@
         marker.setVisible(false);
         var place = autocomplete.getPlace();
         if (!place.geometry) {
-          window.alert("No details available for input: '" + place.name + "'");
+          //window.alert("No details available for input: '" + place.name + "'");
           return;
         }
 
@@ -263,9 +263,9 @@
           localStorage.setItem('favorites', JSON.stringify(favorites));
 
           updateFavoritesList();
-          alert('Place added to favorites!');
+          //alert('Place added to favorites!');
         } else {
-          alert('Place is already in favorites.');
+          //alert('Place is already in favorites.');
         }
       }
 
@@ -320,7 +320,7 @@
         favorites.splice(index, 1);
         localStorage.setItem('favorites', JSON.stringify(favorites));
         updateFavoritesList();
-        alert('Place removed from favorites.');
+        //alert('Place removed from favorites.');
       }
 
       google.maps.event.addListener(map, 'click', function(event) {
