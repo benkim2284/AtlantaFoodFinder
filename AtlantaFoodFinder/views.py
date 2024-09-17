@@ -6,6 +6,7 @@ from django.views import generic
 
 from .models import Choice, Question
 from django.utils import timezone
+from django.shortcuts import render
 
 
 
@@ -55,3 +56,11 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse("AtlantaFoodFinder:results", args=(question.id,)))
+
+
+def map_view(request):
+    context = {
+        'lat': -25.363,
+        'lng': 131.044
+    }
+    return render(request, 'map.html', context)
