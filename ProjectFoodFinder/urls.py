@@ -18,8 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path("AtlantaFoodFinder/", include("AtlantaFoodFinder.urls")),
+    path("AtlantaFoodFinder/", include("AtlantaFoodFinder.urls")),  
     path('admin/', admin.site.urls),
-    path('map/', include('AtlantaFoodFinder.urls'))
-    
 ]
