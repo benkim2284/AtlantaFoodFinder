@@ -88,8 +88,18 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('AtlantaFoodFinder:index')
+            return redirect('AtlantaFoodFinder:home')
         else:
             return render(request, 'AtlantaFoodFinder/login.html', {'error': 'Invalid credentials'})
     else:
         return render(request, 'AtlantaFoodFinder/login.html')
+
+
+def home_view(request):
+    # Check if the user is authenticated
+    if request.user.is_authenticated:
+        username = request.user.username  # Get the username of the logged-in user
+        return render(request, 'AtlantaFoodFinder/home.html', {'username': username})
+    else:
+        # Redirect to login if user is not logged in
+        return redirect('login')
