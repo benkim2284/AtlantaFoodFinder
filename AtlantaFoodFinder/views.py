@@ -7,7 +7,7 @@ from django.views import generic
 from .models import Choice, Question
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
 from django.contrib.auth.models import User
 
@@ -43,6 +43,10 @@ def login_view(request):
 
 
 def wassup_view(request):
+    if request.method == 'POST' and 'logout' in request.POST:
+        logout(request)  # Log out the user
+        return redirect('login')  # Redirect to the login page after logout
+
     # Check if the user is authenticated
     if request.user.is_authenticated:
         username = request.user.username  # Get the username of the logged-in user
