@@ -1,12 +1,3 @@
-from django.db.models import F
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from django.views import generic
-
-from .models import Choice, Question
-from django.utils import timezone
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
 from django import forms
@@ -16,6 +7,12 @@ from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib import messages
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Restaurant, Review
+from .forms import ReviewForm
 from django.contrib import messages
 
 
@@ -154,3 +151,44 @@ def password_reset_view(request):
             return render(request, 'AtlantaFoodFinder/password_reset.html')
     else:
         return render(request, 'AtlantaFoodFinder/password_reset.html')
+
+
+
+def restaurant_list(request):
+    restaurants = Restaurant.objects.all()
+    return render(request, 'AtlantaFoodFinder/restaurant_list.html', {'restaurants': restaurants})
+
+def restaurant_detail(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+    reviews = restaurant.reviews.select_related('user')
+    return render(request, 'AtlantaFoodFinder/restaurant_detail.html', {
+        'restaurant': restaurant,
+        'reviews': reviews
+    })
+
+@login_required
+def add_review(request, restaurant_id):
+    restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            new_review = form.save(commit=False)
+            new_review.restaurant = restaurant
+            new_review.user = request.user
+            new_review.save()
+            messages.success(request, "Your review has been submitted.")
+            return redirect('AtlantaFoodFinder:restaurant_detail', restaurant_id=restaurant.id)
+    else:
+        form = ReviewForm()
+    return render(request, 'AtlantaFoodFinder/add_review.html', {
+        'form': form,
+        'restaurant': restaurant
+    })
+
+def user_reviews(request, username):
+    user = get_object_or_404(User, username=username)
+    reviews = Review.objects.filter(user=user).select_related('restaurant')
+    return render(request, 'AtlantaFoodFinder/user_reviews.html', {
+        'reviews': reviews,
+        'review_user': user
+    })

@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% block content %}
+  <h1>Reviews by {{ review_user.username }}</h1>
+  {% for review in reviews %}
+    <div>
+      <a href="{% url 'AtlantaFoodFinder:restaurant_detail' review.restaurant.id %}">
+        {{ review.restaurant.name }}
+      </a> rated {{ review.rating }}/5
+      <p>{{ review.review_text }}</p>
+      <p><em>{{ review.date_posted|date:"F j, Y, g:i a" }}</em></p>
+    </div>
+  {% empty %}
+    <p>This user hasn't left any reviews yet.</p>
+  {% endfor %}
+{% endblock %}

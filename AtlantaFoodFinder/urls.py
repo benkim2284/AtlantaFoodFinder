@@ -11,4 +11,9 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('password_reset/', views.password_reset_view, name='password_reset'),
     path('wassup/', views.wassup_view, name='wassup'),  # Route for login view
+    path('restaurants/', views.restaurant_list, name='restaurant_list'),
+    path('restaurants/<int:restaurant_id>/', views.restaurant_detail, name='restaurant_detail'),
+    path('restaurants/<int:restaurant_id>/add_review/', views.add_review, name='add_review'),
+    path('users/<str:username>/reviews/', views.user_reviews, name='user_reviews'),
+
 ]
