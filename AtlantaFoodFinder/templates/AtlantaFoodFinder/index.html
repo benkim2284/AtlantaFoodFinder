@@ -11,14 +11,61 @@
       padding: 0;
       overflow: hidden;
     }
+
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+        height: 40px;
+      background-color: #fff;
+      color: #5f6368;
+      padding: 10px 0;
+      z-index: 1000;
+      box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+    }
+    #navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    #navbar-title {
+      font-family: 'Roboto', sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: #5f6368;
+      letter-spacing: -0.5px;
+    }
+    #logout-btn {
+      font-family: 'Roboto', sans-serif;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #logout-btn:hover {
+      background-color: #1765cc;
+    }
+
+
+
     #map {
       height: 100%;
+      margin-top: 60px;
       width: 100%;
     }
     /* Search input styling */
     #search-input {
       position: absolute;
-      top: 10px;
+      top: 120px;
       right: 10px;
       z-index: 5;
       background-color: #fff;
@@ -30,7 +77,7 @@
     /* Filters styling */
     #filters {
       position: absolute;
-      top: 10px;
+      top: 120px;
       left: 10px;
       z-index: 5;
       background-color: rgba(255, 255, 255, 0.95);
@@ -41,6 +88,7 @@
     #filters label {
       display: block;
       margin-bottom: 5px;
+        top: 50px;
     }
     /* Place details styling */
     #place-details {
@@ -77,7 +125,7 @@
     }
     #favorites-panel {
       position: absolute;
-      top: 150px; 
+      top: 160px;
       right: 10px;
       z-index: 5;
       background-color: rgba(255, 255, 255, 0.95);
@@ -107,7 +155,7 @@
       background-color: #357AE8;
     }
     .btn-view {
-      background-color: #34A853; 
+      background-color: #34A853;
     }
     .btn-view:hover {
       background-color: #2C8C47;
@@ -125,6 +173,13 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFlzEUvEDRjPBCNgR-gucZ82Muk49PQu4&libraries=places"></script>
 </head>
 <body>
+
+  <div id="navbar">
+    <div id="navbar-content">
+      <div id="navbar-title">Atlanta Food Finder</div>
+      <button id="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
   <input id="search-input" type="text" placeholder="Search Box">
   <div id="filters">
     <label>Radius (km): <input id="radius-input" type="number" value="5" min="1" max="50000"></label>
@@ -141,6 +196,28 @@
   </div>
 
   <script>
+    function handleLogout() {
+        const url = '/AtlantaFoodFinder/api/logout/';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/AtlantaFoodFinder/login/';
+            } else {
+                throw new Error('Logout failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Logout failed. Please try again.');
+        })
+    }
+
     function initMap() {
       var map = new google.maps.Map(document.getElementById('map'), {
         zoom: 12
