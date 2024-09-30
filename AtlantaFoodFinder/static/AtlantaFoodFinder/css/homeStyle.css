@@ -1,0 +1,117 @@
+/* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f8ff; /* Light blue background */
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header {
+    background-color: #f9f9f9; /* Light gray/white header */
+    padding: 20px;
+    color: #333; /* Dark text for contrast */
+    text-align: center;
+    border-bottom: 2px solid #e0e0e0; /* Subtle border at the bottom */
+}
+
+header h1 {
+    font-size: 2em;
+    margin: 0;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #333; /* Darker color for contrast */
+    text-shadow: none; /* Remove text shadow for cleaner look */
+}
+
+
+/* General button styling */
+.login-btn {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+    margin-top: 10px; /* Reduce the margin-top of the button */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.login-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Center the login button */
+.login-button-container {
+    text-align: center;
+    margin-top: 10px; /* Adjust the overall space around the button */
+}
+
+/* Main Content */
+main {
+    padding: 5px 20px;
+    text-align: center;
+    margin-top: 0;
+}
+
+h1 {
+    color: #0056b3; /* Blue for the main title */
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+/* Restaurant Cards */
+.restaurant-list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.restaurant-card {
+    background-color: white;
+    border: 2px solid #007BFF;
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    margin: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.restaurant-card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.restaurant-card h2 {
+    color: #007BFF;
+    margin: 10px 0;
+}
+
+.restaurant-card p {
+    color: #333;
+    margin: 10px 0;
+}
+
+.restaurant-card button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.restaurant-card button:hover {
+    background-color: #0056b3;
+}
+
+.restaurant-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
