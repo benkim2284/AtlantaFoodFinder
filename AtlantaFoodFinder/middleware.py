@@ -12,6 +12,7 @@ class AuthenticationMiddleware:
         excluded_paths = [
             "/AtlantaFoodFinder/login/",  # Ensure you have the correct name for the login view
             '/AtlantaFoodFinder/register/', # Ensure you have the correct name for the registration view
+            '/AtlantaFoodFinder/password_reset/',  # Ensure you have the correct name for the registration view
             '/AtlantaFoodFinder/',
         ]
 
