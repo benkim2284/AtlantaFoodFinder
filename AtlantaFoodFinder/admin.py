@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .models import Question, Choice, Favorite
 from .models import Question, Choice, Restaurant, Review
 
 class ChoiceInline(admin.TabularInline):
@@ -20,3 +21,5 @@ admin.site.register(Restaurant)
 admin.site.register(Review)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Choice)
+admin.site.register(Favorite)
+

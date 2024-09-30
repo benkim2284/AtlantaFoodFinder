@@ -1,12 +1,18 @@
+from django.http import JsonResponse, HttpResponse
+
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Favorite
+import json
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from django.contrib import messages
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -66,7 +72,6 @@ class RegisterForm(forms.ModelForm):
         if password and confirm_password and password != confirm_password:
             raise ValidationError("Passwords do not match.")
 
-
 def map_view(request):
     return render(request, 'AtlantaFoodFinder/index.html')
 
@@ -97,27 +102,83 @@ def login_view(request):
     else:
         return render(request, 'AtlantaFoodFinder/login.html')
 
+@login_required
+@csrf_exempt
 def logout_view(request):
-    logout(request)
-    return redirect('AtlantaFoodFinder:login')
-
-
-def wassup_view(request):
-    if request.method == 'POST' and 'logout' in request.POST:
-        logout(request)  # Log out the user
-        return redirect('login')  # Redirect to the login page after logout
-
-    # Check if the user is authenticated
-    if request.user.is_authenticated:
-        username = request.user.username  # Get the username of the logged-in user
-        return render(request, 'AtlantaFoodFinder/wassup.html', {'username': username})
+    if request.method == 'POST':
+        logout(request)
+        return HttpResponse(status=200)
     else:
-        # Redirect to login if user is not logged in
-        return redirect('login')
+        return HttpResponse(status=500)
 
 def home_view(request):
     # Check if the user is authenticated
     return render(request, 'AtlantaFoodFinder/home.html')
+
+@login_required
+@csrf_exempt
+def add_favorite_place(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            place_id = data.get('place_id')
+            name = data.get('name')
+            location = data.get('location')
+            formatted_address = data.get('formatted_address')
+
+            existing_favorite = Favorite.objects.filter(
+                user=request.user,
+                place_id=place_id  # You can also check using 'location' if needed
+            ).exists()
+
+            if existing_favorite:
+                return JsonResponse({'error': 'This location is already favorited.'}, status=400)
+
+            # Create a new FavoritePlace and save it to the database
+            favorite = Favorite(user=request.user, place_id=place_id, name=name, location = location, formatted_address = formatted_address)
+            favorite.save()
+
+            return JsonResponse({'message': 'Favorite place added successfully'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@login_required
+@csrf_exempt
+def get_favorites(request):
+    if request.method == 'GET':
+        try:
+            existing_favorites = Favorite.objects.filter(
+                user=request.user,
+            ).values('place_id', 'name', 'location', 'formatted_address')
+            return JsonResponse({'existing_favorites': list(existing_favorites)}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@login_required
+@csrf_exempt
+def remove_favorite(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            place_id = data.get('place_id')
+
+            # Check if the favorite place exists for the logged-in user
+            favorite = Favorite.objects.filter(user=request.user, place_id=place_id).first()
+
+            if favorite:
+                favorite.delete()  # Remove the favorite place
+                return JsonResponse({'message': 'Favorite place removed successfully'}, status=200)
+            else:
+                return JsonResponse({'error': 'Favorite place not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
 
 def password_reset_view(request):
     if request.method == 'POST':
@@ -151,6 +212,7 @@ def password_reset_view(request):
             return render(request, 'AtlantaFoodFinder/password_reset.html')
     else:
         return render(request, 'AtlantaFoodFinder/password_reset.html')
+
 
 
 
