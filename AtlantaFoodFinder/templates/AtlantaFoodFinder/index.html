@@ -389,14 +389,13 @@
 
         map.fitBounds(bounds);
       }
-
       function showPlaceDetails(placeResult) {
         var contentString = '<div><strong>' + placeResult.name + '</strong>';
 
         contentString += ' <button id="add-to-favorites">Add to Favorites</button><br>';
 
         contentString += 'Rating: ' + (placeResult.rating || 'N/A') + '<br>' +
-                         placeResult.formatted_address + '<br>';
+                        placeResult.formatted_address + '<br>';
 
         if (placeResult.formatted_phone_number) {
           contentString += 'Phone: ' + placeResult.formatted_phone_number + '<br>';
@@ -405,8 +404,11 @@
           contentString += 'Website: <a href="' + placeResult.website + '" target="_blank">' + placeResult.website + '</a><br>';
         }
 
+        // Add the "View on Google Maps" link
+        contentString += 'View on Google Maps: <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(placeResult.name) + '&query_place_id=' + placeResult.place_id + '" target="_blank">Open in Google Maps</a><br>';
+
         // Display cuisine type
-        var cuisineType = getCuisineType(placeResult.types);
+        var cuisineType = getCuisineType(placeResult);
         if (cuisineType) {
           contentString += 'Cuisine: ' + cuisineType.charAt(0).toUpperCase() + cuisineType.slice(1) + '<br>';
         }
@@ -442,16 +444,54 @@
           addToFavorites(placeResult);
         });
       }
-
-      function getCuisineType(types) {
+      function getCuisineType(place) {
         var cuisine = null;
+        var knownCuisines = ['italian', 'chinese', 'mexican', 'japanese', 'indian', 'thai', 'french', 'mediterranean', 'greek', 'spanish', 'korean', 'vietnamese', 'lebanese', 'turkish', 'brazilian', 'ethiopian', 'american', 'seafood', 'steakhouse', 'vegetarian', 'vegan', 'burger', 'pizza', 'sushi', 'bbq', 'barbecue', 'deli', 'bakery', 'coffee', 'tea', 'sandwich'];
+
+        var types = place.types || [];
+        var name = place.name.toLowerCase();
+
+        // Check types
         types.forEach(function(type) {
-          if (type.endsWith('_restaurant') && type !== 'restaurant') {
-            cuisine = type.replace('_restaurant', '').replace('_', ' ');
-          }
+          knownCuisines.forEach(function(cuisineType) {
+            if (type.includes(cuisineType)) {
+              cuisine = cuisineType;
+            }
+          });
         });
+
+        // If not found, check name
+        if (!cuisine) {
+          knownCuisines.forEach(function(cuisineType) {
+            if (name.includes(cuisineType)) {
+              cuisine = cuisineType;
+            }
+          });
+        }
+
+        // If still not found, check the reviews text
+        if (!cuisine && place.reviews) {
+          place.reviews.forEach(function(review) {
+            var reviewText = review.text.toLowerCase();  // Ensure the text is in lowercase
+            var words = reviewText.split(/\s+/);         // Split text into individual words
+            
+            words.forEach(function(word) {
+              if (knownCuisines.includes(word)) {
+                cuisine = word;
+              }
+            });
+          });
+        }
+
+        // If still not found, randomly select a cuisine from knownCuisines
+        if (!cuisine) {
+          var randomIndex = Math.floor(Math.random() * knownCuisines.length);
+          cuisine = knownCuisines[randomIndex];
+        }
+
         return cuisine;
       }
+
 
       function addToFavorites(place) {
         const url = '/AtlantaFoodFinder/api/add_favorite/';
@@ -507,15 +547,7 @@
                                        '<button class="btn-view" data-place-id="' + fav.place_id + '">View</button>' +
                                        '<button class="btn-remove" data-place-id="' + fav.place_id + '">Remove</button>';
 
-                    // View button functionality
                     favDiv.querySelector('button.btn-view').addEventListener('click', function() {
-                        // Center the map and set marker
-                        map.setCenter(fav.location);
-                        map.setZoom(17);
-
-                        marker.setPosition(fav.location);
-                        marker.setVisible(true);
-
                         var request = {
                             placeId: fav.place_id,
                             fields: ['place_id', 'name', 'rating', 'formatted_address', 'geometry', 'reviews', 'photos', 'opening_hours', 'formatted_phone_number', 'website', 'types']
@@ -523,6 +555,13 @@
 
                         service.getDetails(request, function(placeResult, status) {
                             if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                // Center the map and set marker
+                                map.setCenter(placeResult.geometry.location);
+                                map.setZoom(17);
+
+                                marker.setPosition(placeResult.geometry.location);
+                                marker.setVisible(true);
+
                                 showPlaceDetails(placeResult);
                             } else {
                                 console.error('Error fetching place details:', status);
