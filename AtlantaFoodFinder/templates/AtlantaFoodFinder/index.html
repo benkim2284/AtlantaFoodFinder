@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GMap</title>
+  <title>Atlanta Food Finder</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <style>
     /* Reset and map container styling */
@@ -17,7 +17,7 @@
       top: 0;
       left: 0;
       width: 100%;
-        height: 40px;
+      height: 40px;
       background-color: #fff;
       color: #5f6368;
       padding: 10px 0;
@@ -55,8 +55,6 @@
       background-color: #1765cc;
     }
 
-
-
     #map {
       height: 100%;
       margin-top: 60px;
@@ -88,7 +86,6 @@
     #filters label {
       display: block;
       margin-bottom: 5px;
-        top: 50px;
     }
     /* Place details styling */
     #place-details {
@@ -181,10 +178,15 @@
     </div>
   </div>
   <input id="search-input" type="text" placeholder="Search Box">
+
+  <!-- Updated Filters Section with Separate Checkboxes -->
   <div id="filters">
+    <label><input id="enable-radius-filter" type="checkbox" checked> Enable</label>
     <label>Radius (km): <input id="radius-input" type="number" value="5" min="1" max="50000"></label>
+    <label><input id="enable-rating-filter" type="checkbox" checked> Enable</label>
     <label>Minimum Rating: <input id="rating-input" type="number" step="0.1" min="0" max="5"></label>
   </div>
+
   <div id="favorites-panel">
     <h3>Favorites</h3>
     <div id="favorites-list"></div>
@@ -226,6 +228,8 @@
       var input = document.getElementById('search-input');
       var radiusInput = document.getElementById('radius-input');
       var ratingInput = document.getElementById('rating-input');
+      var enableRadiusFilterCheckbox = document.getElementById('enable-radius-filter');
+      var enableRatingFilterCheckbox = document.getElementById('enable-rating-filter');
       var autocomplete = new google.maps.places.Autocomplete(input);
       autocomplete.bindTo('bounds', map);
 
@@ -239,12 +243,14 @@
       updateFavoritesList();
 
       var searchMarkers = [];
+      var lastQuery = '';
 
       // Handle Enter key press on the search input
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          performSearch(input.value);
+          lastQuery = input.value;
+          performSearch(lastQuery);
         }
       });
 
@@ -253,7 +259,8 @@
         marker.setVisible(false);
         var place = autocomplete.getPlace();
         if (!place.geometry) {
-          performSearch(place.name || input.value);
+          lastQuery = place.name || input.value;
+          performSearch(lastQuery);
           return;
         }
 
@@ -281,9 +288,45 @@
         });
       });
 
+      // Event listeners for filters to auto-apply
+      radiusInput.addEventListener('change', function() {
+        if (lastQuery) {
+          performSearch(lastQuery);
+        }
+      });
+
+      ratingInput.addEventListener('change', function() {
+        if (lastQuery) {
+          performSearch(lastQuery);
+        }
+      });
+
+      enableRadiusFilterCheckbox.addEventListener('change', function() {
+        if (lastQuery) {
+          performSearch(lastQuery);
+        }
+      });
+
+      enableRatingFilterCheckbox.addEventListener('change', function() {
+        if (lastQuery) {
+          performSearch(lastQuery);
+        }
+      });
+
       function performSearch(query) {
-        var radiusValue = 1000 * parseInt(radiusInput.value) || 5;
-        var minRating = parseFloat(ratingInput.value) || 0;
+        var enableRadiusFilter = enableRadiusFilterCheckbox.checked;
+        var enableRatingFilter = enableRatingFilterCheckbox.checked;
+
+        var radiusValue = 50000; // Default large radius when filter is disabled
+        var minRating = 0;       // Default minimum rating when filter is disabled
+
+        if (enableRadiusFilter) {
+          radiusValue = 1000 * parseInt(radiusInput.value) || 5000;
+        }
+
+        if (enableRatingFilter) {
+          minRating = parseFloat(ratingInput.value) || 0;
+        }
 
         var request = {
           query: query,
@@ -291,12 +334,15 @@
           radius: radiusValue,
           type: ['restaurant'],
         };
+
         service.textSearch(request, function(results, status) {
           if (status === google.maps.places.PlacesServiceStatus.OK) {
-            // Filter results by rating
-            results = results.filter(function(place) {
-              return (place.rating || 0) >= minRating;
-            });
+            // Apply rating filter only if enabled
+            if (enableRatingFilter) {
+              results = results.filter(function(place) {
+                return (place.rating || 0) >= minRating;
+              });
+            }
             showSearchResults(results);
           } else {
             console.error('Search failed:', status);
@@ -358,7 +404,7 @@
         if (placeResult.website) {
           contentString += 'Website: <a href="' + placeResult.website + '" target="_blank">' + placeResult.website + '</a><br>';
         }
-        console.log(placeResult)
+
         // Display cuisine type
         var cuisineType = getCuisineType(placeResult.types);
         if (cuisineType) {
@@ -398,7 +444,6 @@
       }
 
       function getCuisineType(types) {
-        console.log(types)
         var cuisine = null;
         types.forEach(function(type) {
           if (type.endsWith('_restaurant') && type !== 'restaurant') {
@@ -409,7 +454,7 @@
       }
 
       function addToFavorites(place) {
-        const url = '/AtlantaFoodFinder/api/add_favorite/';        // Your Django API endpoint URL
+        const url = '/AtlantaFoodFinder/api/add_favorite/';
         const data = {
             place_id: place.place_id,
             name: place.name,
@@ -422,14 +467,14 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)     // Sending the data in the request body
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
             if (data.message) {
                 updateFavoritesList();
             } else if (data.error) {
-                alert('Error: ' + data.error);   // Show error message
+                alert('Error: ' + data.error);
             }
         })
         .catch(error => console.error('Error:', error));
@@ -439,8 +484,7 @@
         var favoritesListDiv = document.getElementById('favorites-list');
         favoritesListDiv.innerHTML = '';
 
-        // Fetch favorite places from the server
-        fetch('/AtlantaFoodFinder/api/get_favorites')  // Adjust the URL to match your Django endpoint
+        fetch('/AtlantaFoodFinder/api/get_favorites')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -448,7 +492,6 @@
                 return response.json();
             })
             .then(data => {
-                // Use the 'existing_favorites' key returned from Django
                 favorites = data.existing_favorites;
 
                 if (favorites.length === 0) {
@@ -464,9 +507,8 @@
                                        '<button class="btn-view" data-place-id="' + fav.place_id + '">View</button>' +
                                        '<button class="btn-remove" data-place-id="' + fav.place_id + '">Remove</button>';
 
-
                     // View button functionality
-                    favDiv.querySelector('button[data-place-id]').addEventListener('click', function() {
+                    favDiv.querySelector('button.btn-view').addEventListener('click', function() {
                         // Center the map and set marker
                         map.setCenter(fav.location);
                         map.setZoom(17);
@@ -476,15 +518,15 @@
 
                         var request = {
                             placeId: fav.place_id,
-                            fields: ['place_id', 'name', 'rating', 'formatted_address', 'geometry', 'reviews', 'photos', 'opening_hours', 'formatted_phone_number', 'website']
+                            fields: ['place_id', 'name', 'rating', 'formatted_address', 'geometry', 'reviews', 'photos', 'opening_hours', 'formatted_phone_number', 'website', 'types']
                         };
-
 
                         service.getDetails(request, function(placeResult, status) {
                             if (status === google.maps.places.PlacesServiceStatus.OK) {
                                 showPlaceDetails(placeResult);
                             } else {
                                 console.error('Error fetching place details:', status);
+                                document.getElementById('place-content').innerHTML = 'Error fetching place details.';
                             }
                         });
                     });
@@ -503,8 +545,9 @@
                 favoritesListDiv.innerHTML = '<p>Error loading favorites. Please try again later.</p>';
             });
       }
+
       function removeFromFavorites(placeIdToRemove) {
-        const url = '/AtlantaFoodFinder/api/remove_favorite/';        // Your Django API endpoint URL
+        const url = '/AtlantaFoodFinder/api/remove_favorite/';
         const data = {
             place_id: placeIdToRemove,
         };
@@ -514,14 +557,14 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)     // Sending the data in the request body
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
             if (data.message) {
                 updateFavoritesList();
             } else if (data.error) {
-                alert('Error: ' + data.error);   // Show error message
+                alert('Error: ' + data.error);
             }
         })
         .catch(error => console.error('Error:', error));
