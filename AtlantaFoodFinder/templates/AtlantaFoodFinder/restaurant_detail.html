@@ -1,0 +1,75 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ restaurant.name }} Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .restaurant-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .restaurant-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .review-item {
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 0;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        .add-review-btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="restaurant-container">
+        {% if restaurant %}
+            <div class="restaurant-header">
+                <h1 class="display-4">{{ restaurant.name }}</h1>
+                <p class="lead">{{ restaurant.cuisine }}</p>
+                <p class="text-muted">
+                    Average Rating: <strong>{{ restaurant.average_rating|default:"No ratings yet" }}</strong>
+                </p>
+            </div>
+
+            <h2 class="h3 mb-4">Reviews</h2>
+            <div class="reviews-section">
+                {% for review in reviews %}
+                    <div class="review-item">
+                        <strong>{{ review.user.username }}</strong> rated <span class="badge bg-success">{{ review.rating }}/5</span>
+                        <p>{{ review.review_text }}</p>
+                        <p class="text-muted"><em>{{ review.date_posted|date:"F j, Y, g:i a" }}</em></p>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No reviews yet. Be the first to review!</p>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'AtlantaFoodFinder:add_review' restaurant.hashed_address %}" class="btn btn-primary add-review-btn">
+                    Add a Review
+                </a>
+            {% else %}
+                <p class="text-muted">You must be logged in to add a review.</p>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-danger text-center">
+                <h1>Restaurant not found</h1>
+            </div>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+{% endblock %}
+
