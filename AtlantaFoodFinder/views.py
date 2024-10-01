@@ -3,18 +3,20 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import Favorite
 import json
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 
-from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib import messages
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Restaurant, Review, Favorite
+from .forms import ReviewForm
+from django.contrib import messages
+import hashlib
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(
@@ -206,3 +208,77 @@ def password_reset_view(request):
             return render(request, 'AtlantaFoodFinder/password_reset.html')
     else:
         return render(request, 'AtlantaFoodFinder/password_reset.html')
+@login_required
+@csrf_exempt
+def check_add_restaurant(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        name = data.get('name')
+        cuisine = data.get('cuisine')
+        address = data.get('address')
+
+        restaurant_hash = hash_address(address)
+
+        exists = Restaurant.objects.filter(hashed_address=restaurant_hash).exists()
+        try:
+            if not exists:
+                new_restaurant = Restaurant(hashed_address=restaurant_hash, name=name, cuisine=cuisine)
+                new_restaurant.save()
+                print("new restaurant")
+                return JsonResponse({'message': restaurant_hash}, status=200)
+            print("restaurant already exists")
+            return JsonResponse({'message': restaurant_hash}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+def restaurant_detail(request, restaurant_hash):
+    restaurant = Restaurant.objects.filter(hashed_address=restaurant_hash).first()
+
+    if restaurant:
+        reviews = restaurant.reviews.all()
+    else:
+        restaurant = None  # Set to None if restaurant doesn't exist
+        reviews = []
+
+    return render(request, 'AtlantaFoodFinder/restaurant_detail.html', {
+        'restaurant': restaurant,
+        'reviews': reviews
+    })
+
+@login_required
+def add_review(request, restaurant_hash):
+    restaurant = get_object_or_404(Restaurant, hashed_address=restaurant_hash)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            new_review = form.save(commit=False)
+            new_review.restaurant = restaurant
+            new_review.user = request.user
+            new_review.save()
+            messages.success(request, "Your review has been submitted.")
+
+            restaurant = get_object_or_404(Restaurant, hashed_address=restaurant_hash)
+            return redirect('AtlantaFoodFinder:restaurant_detail', restaurant_hash=restaurant.hashed_address)
+    else:
+        form = ReviewForm()
+    return render(request, 'AtlantaFoodFinder/add_review.html', {
+        'form': form,
+        'restaurant': restaurant
+    })
+
+def user_reviews(request, username):
+    user = get_object_or_404(User, username=username)
+    reviews = Review.objects.filter(user=user).select_related('restaurant')
+    return render(request, 'AtlantaFoodFinder/user_reviews.html', {
+        'reviews': reviews,
+        'review_user': user
+    })
+
+
+def hash_address(address) :
+    address_bytes = address.encode('utf-8')
+    hash_object = hashlib.sha256()
+    hash_object.update(address_bytes)
+    hashed_address = hash_object.hexdigest()
+    return hashed_address

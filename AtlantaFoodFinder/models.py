@@ -1,8 +1,9 @@
 import datetime
-
 from django.contrib import admin
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.contrib.auth.models import User
 
 
@@ -40,3 +41,27 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.formatted_address})'
+
+
+class Restaurant(models.Model):
+    hashed_address = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=255)
+    cuisine = models.CharField(max_length=255)
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if reviews.exists():
+            return reviews.aggregate(models.Avg('rating'))['rating__avg']
+        return None
+
+class Review(models.Model):
+    restaurant = models.ForeignKey(Restaurant, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    review_text = models.TextField(validators=[
+        MinLengthValidator(10),
+        MaxLengthValidator(2000)
+    ])
+    date_posted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.user.username} on {self.restaurant.name}'

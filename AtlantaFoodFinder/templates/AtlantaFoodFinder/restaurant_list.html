@@ -1,0 +1,10 @@
+{% block content %}
+  <h1>Restaurants</h1>
+  <ul>
+    {% for restaurant in restaurants %}
+      <li>
+        <a href="{% url 'AtlantaFoodFinder:restaurant_detail' restaurant.id %}">{{ restaurant.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

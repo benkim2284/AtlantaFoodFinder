@@ -13,4 +13,10 @@ urlpatterns = [
     path('api/add_favorite/', views.add_favorite_place, name='add_favorite'),  # Route for login view
     path('api/get_favorites/', views.get_favorites, name='get_favorites'),  # Route for login view
     path('api/remove_favorite/', views.remove_favorite, name='remove_favorite'),  # Route for login view
+    path('api/check_add_restaurant/', views.check_add_restaurant, name='check_add_restaurant'),
+
+
+    path('restaurants/<str:restaurant_hash>/', views.restaurant_detail, name='restaurant_detail'),
+    path('restaurants/<str:restaurant_hash>/add_review/', views.add_review, name='add_review'),
+    path('users/<str:username>/reviews/', views.user_reviews, name='user_reviews'),
 ]
