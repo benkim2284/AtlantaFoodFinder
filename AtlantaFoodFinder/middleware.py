@@ -8,18 +8,18 @@ class AuthenticationMiddleware:
     def __call__(self, request):
         print(f"Requested path: {request.path}")
         print(f"User authenticated: {request.user.is_authenticated}")
+        if request.path == "/":
+            return redirect('AtlantaFoodFinder:index')
 
         excluded_paths = [
-            "/AtlantaFoodFinder/login/",  # Ensure you have the correct name for the login view
-            '/AtlantaFoodFinder/register/', # Ensure you have the correct name for the registration view
-            '/AtlantaFoodFinder/password_reset/',  # Ensure you have the correct name for the registration view
+            "/AtlantaFoodFinder/login/",
+            '/AtlantaFoodFinder/register/',
+            '/AtlantaFoodFinder/password_reset/',
             '/AtlantaFoodFinder/',
         ]
 
-        # Check if the user is authenticated
         if not request.user.is_authenticated and request.path not in excluded_paths:
-            return redirect('AtlantaFoodFinder:login')  # Redirect to the login page
+            return redirect('AtlantaFoodFinder:login')
 
-            # If authenticated or path is excluded, continue processing the request
         response = self.get_response(request)
         return response

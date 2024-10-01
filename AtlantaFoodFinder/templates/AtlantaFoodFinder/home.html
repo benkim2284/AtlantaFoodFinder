@@ -1,11 +1,47 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'AtlantaFoodFinder/css/homeStyle.css' %}">
+    <title>Atlanta Munchies</title>
 </head>
 <body>
-    <h1>Welcome to AtlantaFoodFinder!!!</h1>
+    <header>
+        <h1>Welcome to Atlanta Food Finder</h1>
+        <div class="description">
+            <p>Explore the best restaurants and cuisines that Atlanta has to offer.</p>
+        </div>
+    </header>
+    <main>
+        <h1>Discover the best food near you</h1>
+        <div class="login-button-container">
+            <a href="{% url 'AtlantaFoodFinder:login' %}">
+                <button class="login-btn">Log In Now</button>
+            </a>
+        </div>
+        <div class="restaurant-list">
+            <div class="restaurant-card">
+                <img src="{% static 'AtlantaFoodFinder/images/restaurant1.jpg' %}" alt="Restaurant 1">
+                <h2>Restaurant 1</h2>
+                <p>Delicious pizza and pasta.</p>
+                <a href="{% url 'AtlantaFoodFinder:map' %}"><button>Look Now!</button></a>
+            </div>
+            <div class="restaurant-card">
+                <img src="{% static 'AtlantaFoodFinder/images/restaurant2.jpg' %}" alt="Restaurant 2">
+                <h2>Restaurant 2</h2>
+                <p>Fresh sushi and Japanese cuisine.</p>
+                <a href="{% url 'AtlantaFoodFinder:map' %}"><button>Look Now!</button></a>
+            </div>
+            <div class="restaurant-card">
+                <img src="{% static 'AtlantaFoodFinder/images/restaurant3.jpg' %}" alt="Restaurant 3">
+                <h2>Restaurant 3</h2>
+                <p>Mouthwatering burgers and fries.</p>
+                <a href="{% url 'AtlantaFoodFinder:map' %}"><button>Look Now!</button></a>
+            </div>
+
+        </div>
+    </main>
 </body>
 </html>
