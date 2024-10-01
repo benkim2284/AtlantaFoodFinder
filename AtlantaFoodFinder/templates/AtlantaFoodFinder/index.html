@@ -381,7 +381,16 @@
       function showPlaceDetails(placeResult) {
         var contentString = '<div><strong>' + placeResult.name + '</strong>';
 
-        contentString += ' <button id="add-to-favorites">Add to Favorites</button><br>';
+        contentString += '<div style="display: inline-block; margin-right: 10px;">';
+        contentString += '<button id="add-to-favorites">Add to Favorites</button>';
+        contentString += '</div>';
+
+        // Add "View/Add Reviews" button next to "Add to Favorites"
+        contentString += '<div style="display: inline-block;">';
+        contentString += '<button id="view-add-reviews">View/Add Reviews</button>';
+        contentString += '</div>';
+        contentString += '<br>'; // Optional line break for styling
+
 
         contentString += 'Rating: ' + (placeResult.rating || 'N/A') + '<br>' +
                         placeResult.formatted_address + '<br>';
@@ -431,6 +440,33 @@
 
         document.getElementById('add-to-favorites').addEventListener('click', function() {
           addToFavorites(placeResult);
+        });
+        document.getElementById('view-add-reviews').addEventListener('click', function() {
+            const url = '/AtlantaFoodFinder/api/check_add_restaurant/';
+            const data = {
+                name: placeResult.name,
+                address: placeResult.formatted_address,
+                cuisine: cuisineType.charAt(0).toUpperCase() + cuisineType.slice(1)
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    window.location.href = `/AtlantaFoodFinder/restaurants/${data.message}/`;
+                } else if (data.error) {
+                    throw new Error('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Failed to check/add restaurant. Please try again.');
+            })
         });
       }
       function getCuisineType(place) {

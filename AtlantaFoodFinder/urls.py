@@ -10,13 +10,13 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),  # Route for login view
     path('api/logout/', views.logout_view, name='logout'),
     path('password_reset/', views.password_reset_view, name='password_reset'),
-    path('wassup/', views.wassup_view, name='wassup'),  # Route for login view
-    path('restaurants/', views.restaurant_list, name='restaurant_list'),
-    path('restaurants/<int:restaurant_id>/', views.restaurant_detail, name='restaurant_detail'),
-    path('restaurants/<int:restaurant_id>/add_review/', views.add_review, name='add_review'),
-    path('users/<str:username>/reviews/', views.user_reviews, name='user_reviews'),
-
     path('api/add_favorite/', views.add_favorite_place, name='add_favorite'),  # Route for login view
     path('api/get_favorites/', views.get_favorites, name='get_favorites'),  # Route for login view
     path('api/remove_favorite/', views.remove_favorite, name='remove_favorite'),  # Route for login view
+    path('api/check_add_restaurant/', views.check_add_restaurant, name='check_add_restaurant'),
+
+
+    path('restaurants/<str:restaurant_hash>/', views.restaurant_detail, name='restaurant_detail'),
+    path('restaurants/<str:restaurant_hash>/add_review/', views.add_review, name='add_review'),
+    path('users/<str:username>/reviews/', views.user_reviews, name='user_reviews'),
 ]

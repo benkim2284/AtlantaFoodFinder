@@ -1,15 +1,9 @@
 import datetime
-
 from django.contrib import admin
 from django.db import models
 from django.utils import timezone
-
-
 from django.contrib.auth.models import User
-
 from django.core.validators import MinLengthValidator, MaxLengthValidator
-
-
 from django.contrib.auth.models import User
 
 
@@ -50,13 +44,9 @@ class Favorite(models.Model):
 
 
 class Restaurant(models.Model):
+    hashed_address = models.CharField(max_length=64, unique=True)
     name = models.CharField(max_length=255)
-    description = models.TextField()
-    # Add other fields as necessary, e.g., location, cuisine type, etc.
-
-    def __str__(self):
-        return self.name
-
+    cuisine = models.CharField(max_length=255)
     def average_rating(self):
         reviews = self.reviews.all()
         if reviews.exists():

@@ -1,8 +1,0 @@
-{% block content %}
-  <h1>Add a Review for {{ restaurant.name }}</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit Review</button>
-  </form>
-{% endblock %}
