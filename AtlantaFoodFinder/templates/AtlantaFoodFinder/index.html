@@ -4,7 +4,6 @@
   <title>Atlanta Food Finder</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <style>
-    /* Reset and map container styling */
     html, body {
       height: 100%;
       margin: 0;
@@ -60,7 +59,6 @@
       margin-top: 60px;
       width: 100%;
     }
-    /* Search input styling */
     #search-input {
       position: absolute;
       top: 120px;
@@ -72,7 +70,6 @@
       border: 1px solid #d0d0d0;
       width: 300px;
     }
-    /* Filters styling */
     #filters {
       position: absolute;
       top: 120px;
@@ -87,10 +84,9 @@
       display: block;
       margin-bottom: 5px;
     }
-    /* Place details styling */
     #place-details {
       position: absolute;
-      bottom: -300px; /* Start hidden below the viewport */
+      bottom: -300px;
       left: 0;
       width: 100%;
       max-height: 400px;
@@ -100,13 +96,11 @@
       box-sizing: border-box;
       font-size: 14px;
       z-index: 5;
-      transition: bottom 0.5s; /* For slide-up animation */
+      transition: bottom 0.5s;
     }
-    /* Show the place details when active */
     #place-details.active {
-      bottom: 0; /* Slide up to visible area */
+      bottom: 0;
     }
-    /* Close button styling */
     #close-details {
       position: absolute;
       top: 5px;
@@ -130,7 +124,7 @@
       box-sizing: border-box;
       max-height: 400px;
       overflow-y: auto;
-      width: 300px; /* Match the width of the search input */
+      width: 300px;
     }
     #favorites-panel h3 {
       margin-top: 0;
@@ -179,7 +173,6 @@
   </div>
   <input id="search-input" type="text" placeholder="Search Box">
 
-  <!-- Updated Filters Section with Separate Checkboxes -->
   <div id="filters">
     <label><input id="enable-radius-filter" type="checkbox" checked> Enable</label>
     <label>Radius (km): <input id="radius-input" type="number" value="5" min="1" max="50000"></label>
@@ -245,7 +238,6 @@
       var searchMarkers = [];
       var lastQuery = '';
 
-      // Handle Enter key press on the search input
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -254,7 +246,6 @@
         }
       });
 
-      // Autocomplete place changed event
       autocomplete.addListener('place_changed', function() {
         marker.setVisible(false);
         var place = autocomplete.getPlace();
@@ -317,8 +308,8 @@
         var enableRadiusFilter = enableRadiusFilterCheckbox.checked;
         var enableRatingFilter = enableRatingFilterCheckbox.checked;
 
-        var radiusValue = 50000; // Default large radius when filter is disabled
-        var minRating = 0;       // Default minimum rating when filter is disabled
+        var radiusValue = 50000;
+        var minRating = 0;
 
         if (enableRadiusFilter) {
           radiusValue = 1000 * parseInt(radiusInput.value) || 5000;
@@ -337,7 +328,6 @@
 
         service.textSearch(request, function(results, status) {
           if (status === google.maps.places.PlacesServiceStatus.OK) {
-            // Apply rating filter only if enabled
             if (enableRatingFilter) {
               results = results.filter(function(place) {
                 return (place.rating || 0) >= minRating;
@@ -351,7 +341,6 @@
       }
 
       function showSearchResults(results) {
-        // Clear existing markers
         searchMarkers.forEach(function(marker) {
           marker.setMap(null);
         });
@@ -367,7 +356,7 @@
             position: place.geometry.location,
             title: place.name,
           });
-          searchMarker.placeResult = place; // Save the place result in marker for later use
+          searchMarker.placeResult = place;
 
           searchMarker.addListener('click', function() {
             service.getDetails({
@@ -472,8 +461,8 @@
         // If still not found, check the reviews text
         if (!cuisine && place.reviews) {
           place.reviews.forEach(function(review) {
-            var reviewText = review.text.toLowerCase();  // Ensure the text is in lowercase
-            var words = reviewText.split(/\s+/);         // Split text into individual words
+            var reviewText = review.text.toLowerCase();
+            var words = reviewText.split(/\s+/);
             
             words.forEach(function(word) {
               if (knownCuisines.includes(word)) {
