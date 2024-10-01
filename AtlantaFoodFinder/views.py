@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm
@@ -96,23 +96,14 @@ def login_view(request):
     else:
         return render(request, 'AtlantaFoodFinder/login.html')
 
+@login_required
+@csrf_exempt
 def logout_view(request):
-    logout(request)
-    return redirect('AtlantaFoodFinder:login')
-
-
-def wassup_view(request):
-    if request.method == 'POST' and 'logout' in request.POST:
-        logout(request)  # Log out the user
-        return redirect('login')  # Redirect to the login page after logout
-
-    # Check if the user is authenticated
-    if request.user.is_authenticated:
-        username = request.user.username  # Get the username of the logged-in user
-        return render(request, 'AtlantaFoodFinder/wassup.html', {'username': username})
+    if request.method == 'POST':
+        logout(request)
+        return HttpResponse(status=200)
     else:
-        # Redirect to login if user is not logged in
-        return redirect('login')
+        return HttpResponse(status=500)
 
 def home_view(request):
     # Check if the user is authenticated
